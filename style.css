@@ -1,0 +1,129 @@
+/* Cài đặt chung cho body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Căn nội dung về phía trên */
+    height: 100vh;
+}
+
+/* Tiêu đề căn giữa */
+h1 {
+    color: #1a1a1a;
+    font-size: 2.5rem;
+    margin-bottom: 40px; /* Tạo khoảng cách giữa tiêu đề và nội dung phía dưới */
+    text-align: center; /* Căn giữa tiêu đề */
+    font-weight: bold;
+}
+
+/* Hộp nhập tên */
+.box {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Input box */
+input[type="text"] {
+    width: 80%;
+    padding: 12px;
+    margin: 12px 0;
+    font-size: 1.1rem;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+}
+
+/* Nút bấm */
+button {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Ẩn các tùy chọn ban đầu */
+.hidden {
+    display: none;
+}
+
+/* Tùy chọn */
+.options {
+    margin-top: 20px;
+}
+
+.options button {
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    border-radius: 6px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.options button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Kết quả */
+.result {
+    background-color: #e9f5ff;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    max-width: 400px;
+    width: 100%;
+}
+
+.month {
+    font-weight: bold;
+    color: #007bff;
+    margin-top: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Footer */
+footer {
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.9rem;
+}
