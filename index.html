@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roommate Cleaning Schedule</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Lịch dọn phòng</h1>
+
+        <div class="box" id="nameBox">
+            <h3>Nhập tên:</h3>
+            <input type="text" id="roommateName" placeholder="Your Name" />
+            <button id="submitBtn">Submit</button>
+        </div>
+
+        <!-- Options sẽ bị ẩn cho đến khi người dùng nhập tên -->
+        <div class="options hidden" id="optionsBox">
+            <button id="noteBtn">Note</button>
+            <button id="calendarBtn">Lịch (Google Calendar)</button>
+        </div>
+
+        <div id="cleaningResult" class="hidden result"></div>
+
+        <footer>
+            <p>Today is <span id="todayDate"></span></p>
+        </footer>
+    </div>
+
+    <script>
+        const roommates = ["Kỳ", "Phong", "Quyết", "Nhân"];
+        const sweepingInterval = 3;
+        const moppingInterval = 7;
+        const sweepingStartIndex = roommates.indexOf("Kỳ");
+        const moppingStartIndex = roommates.indexOf("Quyết");
+        const endDate = new Date('2025-08-31');
+
+        const submitBtn = document.getElementById('submitBtn');
+        const noteBtn = document.getElementById('noteBtn');
+        const calendarBtn = document.getElementById('calendarBtn');
+        const cleaningResult = document.getElementById('cleaningResult');
+        const optionsBox = document.getElementById('optionsBox');
+        const nameBox = document.getElementById('nameBox');
+
+        function calculateDaysDifference(startDate, currentDate) {
+            const msInDay = 1000 * 60 * 60 * 24;
+            return Math.floor((currentDate - startDate) / msInDay);
+        }
+
+        function calculateCleaningSchedule() {
+            const today = new Date();
+            const cleaningSchedule = [];
+            const startDate = new Date('2024-09-29');
+
+            for (let date = new Date(today); date <= endDate; date.setDate(date.getDate() + 1)) {
+                const dayCount = calculateDaysDifference(startDate, date);
+
+                const sweepingPerson = roommates[(sweepingStartIndex + Math.floor(dayCount / sweepingInterval)) % roommates.length];
+                const moppingPerson = roommates[(moppingStartIndex + Math.floor(dayCount / moppingInterval)) % roommates.length];
+
+                if (dayCount % sweepingInterval === 0 || dayCount % moppingInterval === 0) {
+                    cleaningSchedule.push({
+                        date: new Date(date),
+                        sweeping: dayCount % sweepingInterval === 0 ? sweepingPerson : null,
+                        mopping: dayCount % moppingInterval === 0 ? moppingPerson : null
+                    });
+                }
+            }
+
+            return cleaningSchedule;
+        }
+
+        function filterScheduleByRoommate(schedule, roommateName) {
+            return schedule.filter(item => item.sweeping === roommateName || item.mopping === roommateName);
+        }
+
+        function generateICSFile(schedule) {
+            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\n";
+
+            schedule.forEach(item => {
+                const eventStart = item.date.toISOString().split('T')[0].replace(/-/g, '');
+                const eventEnd = new Date(item.date.getTime() + 86400000).toISOString().split('T')[0].replace(/-/g, '');
+
+                if (item.sweeping) {
+                    icsContent += `BEGIN:VEVENT\nSUMMARY:Quét nhà\nDESCRIPTION:Quét nhà\nDTSTART;VALUE=DATE:${eventStart}\nDTEND;VALUE=DATE:${eventEnd}\nEND:VEVENT\n`;
+                }
+                if (item.mopping) {
+                    icsContent += `BEGIN:VEVENT\nSUMMARY:Lau nhà\nDESCRIPTION:Lau nhà, dọn nhà vệ sinh\nDTSTART;VALUE=DATE:${eventStart}\nDTEND;VALUE=DATE:${eventEnd}\nEND:VEVENT\n`;
+                }
+            });
+
+            icsContent += "END:VCALENDAR";
+
+            const blob = new Blob([icsContent], { type: 'text/calendar' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'cleaning_schedule.ics';
+            link.click();
+        }
+
+        function displayCompactScheduleForRoommate(schedule, roommateName) {
+            const groupedSchedule = {};
+
+            schedule.forEach(item => {
+                const month = item.date.toLocaleString('vi-VN', { month: 'long', year: 'numeric' });
+                if (!groupedSchedule[month]) {
+                    groupedSchedule[month] = [];
+                }
+                if (item.sweeping === roommateName || item.mopping === roommateName) {
+                    groupedSchedule[month].push(item);
+                }
+            });
+
+            let displayHtml = `<h2>Lịch dọn phòng cho ${roommateName}:</h2>`;
+            for (const month in groupedSchedule) {
+                displayHtml += `<div class="month">${month}</div><ul>`;
+                groupedSchedule[month].forEach(item => {
+                    const date = item.date.toLocaleDateString('vi-VN');
+                    let tasks = '';
+                    if (item.sweeping === roommateName) tasks += 'Quét nhà';
+                    if (item.mopping === roommateName) tasks += (tasks ? ', ' : '') + 'Lau nhà, dọn nhà vệ sinh';
+                    displayHtml += `<li>${date}: ${tasks}</li>`;
+                });
+                displayHtml += `</ul>`;
+            }
+
+            return displayHtml;
+        }
+
+        submitBtn.addEventListener('click', () => {
+            const roommateName = document.getElementById('roommateName').value.trim();
+            if (roommateName && roommates.includes(roommateName)) {
+                nameBox.classList.add('hidden');
+                optionsBox.classList.remove('hidden');
+            } else {
+                alert('Please enter a valid roommate name (Kỳ, Phong, Quyết, Nhân).');
+            }
+        });
+
+        noteBtn.addEventListener('click', () => {
+            const roommateName = document.getElementById('roommateName').value.trim();
+            const schedule = calculateCleaningSchedule();
+            const filteredSchedule = filterScheduleByRoommate(schedule, roommateName);
+            cleaningResult.innerHTML = displayCompactScheduleForRoommate(filteredSchedule, roommateName);
+            cleaningResult.classList.remove('hidden');
+        });
+
+        calendarBtn.addEventListener('click', () => {
+            const roommateName = document.getElementById('roommateName').value.trim();
+            const schedule = calculateCleaningSchedule();
+            const filteredSchedule = filterScheduleByRoommate(schedule, roommateName);
+            generateICSFile(filteredSchedule);
+        });
+
+        document.getElementById('todayDate').innerText = new Date().toLocaleDateString('vi-VN', {
+            weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric'
+        });
+
+    </script>
+
+</body>
+</html>
